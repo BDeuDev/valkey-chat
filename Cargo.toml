@@ -17,3 +17,4 @@ actix-cors = "0.7.1"
 redis = { version = "0.32.5", features = ["aio", "tokio-comp"] }
 arrow = "56.1.0"
 parquet2 = "0.17.2"
+dotenv = "0.15.0"

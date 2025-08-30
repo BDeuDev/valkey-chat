@@ -1,5 +1,5 @@
 use actix_web::{get, web, HttpResponse, Responder};
-use crate::storage::{fetch_messages::fetch_messages, export_to_parquet::export_to_parquet};
+use crate::storage::{messages::fetch, parquet::export};
 use crate::AppState;
 
 #[get("/export")]
@@ -9,12 +9,12 @@ async fn export_messages(state: web::Data<AppState>) -> impl Responder {
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
 
-    let msgs = match fetch_messages(&mut conn, "general").await {
+    let msgs = match fetch(&mut conn, "general").await {
         Ok(m) => m,
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
 
-    if let Err(e) = export_to_parquet(msgs, "chat-export.parquet") {
+    if let Err(e) = export(msgs, "chat-export.parquet") {
         return HttpResponse::InternalServerError().body(e.to_string());
     }
 

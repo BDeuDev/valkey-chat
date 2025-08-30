@@ -2,7 +2,7 @@ use actix_web::{post, web, HttpResponse, Responder};
 use serde::Deserialize;
 
 use crate::{ AppState};
-use crate::storage::{save_message::save_message as save};
+use crate::storage::{messages::save};
 #[derive(Deserialize)]
 pub struct MessagePayload {
     pub room: String,

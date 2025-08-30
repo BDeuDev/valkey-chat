@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: valkey-chat-app
+    depends_on:
+      - valkey
+    environment:
+      VALKEY_HOST: valkey
+      VALKEY_PORT: 6379
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey-db
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+    restart: unless-stopped
+
+volumes:
+  valkey_data:

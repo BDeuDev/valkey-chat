@@ -4,9 +4,12 @@ use redis::Client;
 use tokio;
 
 use crate::routes::init_routes;
+
 mod storage;
 mod routes;
 mod services;
+pub mod models;
+
 #[derive(Clone)]
 pub struct AppState {
     redis_client: Client,
@@ -14,8 +17,14 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let url = "redis://127.0.0.1:6379";
+    dotenv::dotenv().ok();
+
+    let valkey_port = std::env::var("VALKEY_PORT").unwrap();
+    let valkey_host = std::env::var("VALKEY_HOST").unwrap();
+    let url = format!("redis://{valkey_host}:{valkey_port}");
+
     let client = Client::open(url)?;
+
     let state = AppState {
         redis_client: client,
     };
