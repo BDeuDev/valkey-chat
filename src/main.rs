@@ -2,17 +2,22 @@ use actix_cors::Cors;
 use actix_web::{middleware::DefaultHeaders, web, App, HttpServer};
 use redis::Client;
 use tokio;
+use aws_config::{meta::region::RegionProviderChain, BehaviorVersion};
+use aws_sdk_s3::Client as S3Client;
 
 use crate::routes::init_routes;
 
 mod storage;
 mod routes;
 mod services;
-pub mod models;
+mod models;
+mod controllers;
 
+use services::export::ExportService;
 #[derive(Clone)]
 pub struct AppState {
     redis_client: Client,
+    export_service: ExportService
 }
 
 #[tokio::main]
@@ -23,10 +28,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let valkey_host = std::env::var("VALKEY_HOST").unwrap();
     let url = format!("redis://{valkey_host}:{valkey_port}");
 
-    let client = Client::open(url)?;
+    let redis_client = Client::open(url)?;
+
+     // Config S3 (ejemplo con MinIO en Docker)
+    let region_provider = RegionProviderChain::default_provider().or_else("us-east-1");
+    let shared_config = aws_config::defaults(BehaviorVersion::latest())
+        .region(region_provider)
+        .endpoint_url("{}:{}") // MinIO en Docker
+        .load()
+        .await;
+
+    let s3_client = S3Client::new(&shared_config);
+
+    let export_service = ExportService::new(
+        "chat-export.parquet".into(),
+        Some(s3_client),
+        Some("my-bucket".into()),
+    );
 
     let state = AppState {
-        redis_client: client,
+        redis_client,
+        export_service
     };
 
     HttpServer::new(move || {

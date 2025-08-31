@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-arrow2 = { version = "0.18.0", features = ["io_parquet"] }
 actix-web = "4.11.0"
 anyhow = "1.0.98"
 chrono = { version = "0.4.41", features = ["serde"] }
@@ -16,5 +15,6 @@ uuid = { version = "1.18.0", features = ["v4"] }
 actix-cors = "0.7.1"
 redis = { version = "0.32.5", features = ["aio", "tokio-comp"] }
 arrow = "56.1.0"
-parquet2 = "0.17.2"
 dotenv = "0.15.0"
+aws-sdk-s3 = "1.104.0"
+aws-config = "1.8.6"

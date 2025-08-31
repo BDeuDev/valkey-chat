@@ -11,10 +11,25 @@ services:
     environment:
       VALKEY_HOST: valkey
       VALKEY_PORT: 6379
+      S3_HOST: http://127.0.0.1
+      S3_PORT: 9000
+      S3_BUCKET: my-bucket
     ports:
       - "8080:8080"
     volumes:
       - ./logs:/app/logs
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server /data --console-address ":9001"
     restart: unless-stopped
 
   valkey:

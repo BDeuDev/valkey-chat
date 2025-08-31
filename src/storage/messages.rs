@@ -3,7 +3,7 @@ use redis::{AsyncCommands, aio::MultiplexedConnection};
 
 use crate::models::chat_message::ChatMessage;
 
-pub async fn fetch(
+pub async fn fetch_messages(
     conn: &mut MultiplexedConnection,
     room: &str,
 ) -> redis::RedisResult<Vec<ChatMessage>> {
