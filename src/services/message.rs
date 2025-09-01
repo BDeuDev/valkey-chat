@@ -35,7 +35,7 @@ impl MessageService {
         Ok(())
     }
 
-    pub async fn get_recent_messages(&self, room: &str) -> redis::RedisResult<Vec<Message>> {
+    pub async fn get_recent_messages(&self, room: &str) -> redis::RedisResult<Vec<Message>,redis::> {
         let mut conn = self.redis_client.get_multiplexed_tokio_connection().await?;
         let key = format!("chat:{}:messages", room);
 
