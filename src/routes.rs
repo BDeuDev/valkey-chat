@@ -1,9 +1,8 @@
 use actix_web::web;
 
-use crate::services::{export::export_messages, read_history::{read_history}, save_message::save_message};
+use crate::controllers::messages::{create_message, get_messages};
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(save_message);
-    cfg.service(export_messages);
-    cfg.service(read_history);
+    cfg.service(create_message);
+    cfg.service(get_messages);
 }

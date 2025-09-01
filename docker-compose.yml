@@ -11,9 +11,10 @@ services:
     environment:
       VALKEY_HOST: valkey
       VALKEY_PORT: 6379
-      S3_HOST: http://127.0.0.1
-      S3_PORT: 9000
+      S3_ENDPOINT: http://127.0.0.1:9000
       S3_BUCKET: my-bucket
+      S3_ACCESS_KEY: minio
+      S3_SECRET_KEY: minio123
     ports:
       - "8080:8080"
     volumes:

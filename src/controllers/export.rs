@@ -1,9 +1,13 @@
 use actix_web::{get, web, HttpResponse, Responder};
-use crate::AppState;
+use crate::{services::{export::ExportService, message::MessageService}};
 
 #[get("/export")]
-async fn export_messages(state: web::Data<AppState>) -> impl Responder {
-    match state.export_service.export_to_local(&state).await {
+async fn export_messages(export_svc: web::Data<ExportService>, msg_svc: web::Data<MessageService>) -> impl Responder {
+    let msgs =  match msg_svc.get_recent_messages("general").await {
+        Ok(m) => m,
+        Err(e) => HttpResponse::NotFound().body(e.to_string()),
+    };
+    match export_svc.export_to_local(msgs).await {
         Ok(_) => HttpResponse::Ok().body("Exported and uploaded to S3!"),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }

@@ -1,12 +1,12 @@
 use chrono::Utc;
 use redis::{AsyncCommands, aio::MultiplexedConnection};
 
-use crate::models::chat_message::ChatMessage;
+use crate::models::chat_message::Message;
 
 pub async fn fetch_messages(
     conn: &mut MultiplexedConnection,
     room: &str,
-) -> redis::RedisResult<Vec<ChatMessage>> {
+) -> redis::RedisResult<Vec<Message>> {
     let key = format!("chat:{}:messages", room);
     let raw: Vec<String> = conn.lrange(&key, 0, -1).await?;
     Ok(raw
@@ -21,7 +21,7 @@ pub async fn save(
     user: &str,
     text: &str,
 ) -> redis::RedisResult<()> {
-    let msg = ChatMessage {
+    let msg = Message {
         user: user.to_string(),
         room: room.to_string(),
         text: text.to_string(),

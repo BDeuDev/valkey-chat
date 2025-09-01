@@ -3,9 +3,9 @@ use std::{fs::File, sync::Arc};
 use arrow::{array::{Int64Array, StringArray}, datatypes::{DataType, Field, Schema}, record_batch::RecordBatch};
 use parquet::{arrow::{arrow_reader::ParquetRecordBatchReaderBuilder, ArrowWriter}, file::properties::WriterProperties};
 
-use crate::models::chat_message::ChatMessage;
+use crate::models::chat_message::Message;
 
-pub fn read(path: &str) -> anyhow::Result<Vec<ChatMessage>> {
+pub fn read(path: &str) -> anyhow::Result<Vec<Message>> {
     let file = File::open(path)?;
 
     let mut arrow_reader = ParquetRecordBatchReaderBuilder::try_new(file)?
@@ -39,7 +39,7 @@ pub fn read(path: &str) -> anyhow::Result<Vec<ChatMessage>> {
             .unwrap();
 
         for i in 0..batch.num_rows() {
-            messages.push(ChatMessage {
+            messages.push(Message {
                 user: user_col.value(i).to_string(),
                 room: room_col.value(i).to_string(),
                 text: text_col.value(i).to_string(),
@@ -51,7 +51,7 @@ pub fn read(path: &str) -> anyhow::Result<Vec<ChatMessage>> {
     Ok(messages)
 }
 
-pub fn export(messages: Vec<ChatMessage>, path: &str) -> anyhow::Result<()> {
+pub fn export(messages: Vec<Message>, path: &str) -> anyhow::Result<()> {
     let schema = Arc::new(Schema::new(vec![
         Field::new("user", DataType::Utf8, false),
         Field::new("room", DataType::Utf8, false),
