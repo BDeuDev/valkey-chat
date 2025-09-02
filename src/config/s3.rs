@@ -1,11 +1,10 @@
 use aws_config::BehaviorVersion;
 use aws_sdk_s3::Client;
-use aws_sdk_s3::config::{Credentials, Region};
+use aws_sdk_s3::config::{Builder,Credentials, Region};
 
 #[derive(Clone)]
 pub struct S3Config {
     pub endpoint: String,
-    pub bucket: String,
     pub region: String,
     pub access_key: String,
     pub secret_key: String,
@@ -19,7 +18,6 @@ impl S3Config {
 
         Self {
             endpoint,
-            bucket: std::env::var("S3_BUCKET").unwrap_or_else(|_| "my-bucket".to_string()),
             region: std::env::var("S3_REGION").unwrap_or_else(|_| "us-east-1".to_string()),
             access_key: std::env::var("S3_ACCESS_KEY").unwrap_or_else(|_| "minio".to_string()),
             secret_key: std::env::var("S3_SECRET_KEY").unwrap_or_else(|_| "minio123".to_string()),
@@ -43,7 +41,13 @@ impl S3Config {
             loader = loader.endpoint_url(self.endpoint.clone());
         }
 
-        let conf = loader.load().await;
-        Client::new(&conf)
+        let base_conf = loader.load().await;
+
+        // 👇 Acá es donde forzás path-style para MinIO
+        let conf = Builder::from(&base_conf)
+            .force_path_style(true)
+            .build();
+
+        Client::from_conf(conf)
     }
 }

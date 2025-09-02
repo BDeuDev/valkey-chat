@@ -47,4 +47,17 @@ impl MessageService {
 
         Ok(messages)
     }
+
+    pub async fn get_all_messages(&self, room: &str) -> Result<Vec<Message>, redis::RedisError> {
+        let mut conn = self.redis_client.get_multiplexed_tokio_connection().await?;
+        let key = format!("chat:{}:messages", room);
+
+        let serialized: Vec<String> = conn.lrange(key, 0, -1) .await?;
+        let messages: Vec<Message> = serialized
+            .into_iter()
+            .filter_map(|s| serde_json::from_str(&s).ok())
+            .collect();
+
+        Ok(messages)
+    }
 }

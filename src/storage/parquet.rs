@@ -51,7 +51,7 @@ pub fn read(path: &str) -> anyhow::Result<Vec<Message>> {
     Ok(messages)
 }
 
-pub fn export(messages: Vec<Message>, path: &str) -> anyhow::Result<()> {
+pub fn write_file(messages: Vec<Message>, path: &str) -> Result<(),parquet::errors::ParquetError>{
     let schema = Arc::new(Schema::new(vec![
         Field::new("user", DataType::Utf8, false),
         Field::new("room", DataType::Utf8, false),

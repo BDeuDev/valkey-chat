@@ -10,7 +10,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 
 # Compilar binario de la app
-RUN cargo build --release --locked
+RUN cargo build --locked
 
 # Etapa 2: Runtime
 FROM debian:bookworm-slim
@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y libpq5 ca-certificates netcat-openbsd &
 WORKDIR /app
 
 # Copiar binario compilado
-COPY --from=builder /app/target/release/valkey-chat .
+COPY --from=builder /app/target/debug/valkey-chat .
 COPY entrypoint.sh .
 
 RUN chmod +x entrypoint.sh

@@ -1,5 +1,7 @@
-use aws_sdk_s3::Client as S3Client;
+use anyhow::Ok;
+use aws_sdk_s3::{primitives::ByteStream, Client as S3Client};
 use redis::Client;
+use tokio::{fs::File, io::AsyncReadExt};
 
 use crate::models::chat_message::Message;
 
@@ -22,7 +24,29 @@ impl ExportService {
     }
 
     pub async fn export_to_local(&self, messages: Vec<Message>) -> anyhow::Result<()> {
-        crate::storage::parquet::export(messages, &self.export_path)?;
+        crate::storage::parquet::write_file(messages, &self.export_path)?;
+        Ok(())
+    }
+
+    pub async fn export_to_s3(&self, messages: Vec<Message>) -> anyhow::Result<()> {
+        crate::storage::parquet::write_file(messages, &self.export_path)?;
+
+        let mut file = File::open(&self.export_path).await?;
+        let mut buffer = Vec::new();
+
+        file.read_to_end(&mut buffer).await?;
+
+        let bucket = std::env::var("S3_BUCKET").unwrap_or_else(|_| "my-bucket".to_string());
+        let key = "messages.parquet";
+
+        self.s3_client
+            .put_object()
+            .bucket(bucket)
+            .key(key)
+            .body(ByteStream::from(buffer))
+            .send()
+            .await?;
+        
         Ok(())
     }
 }

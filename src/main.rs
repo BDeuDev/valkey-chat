@@ -21,7 +21,8 @@ pub struct AppState {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::dotenv().ok();
-
+    let _ = unsafe { std::env::set_var("RUST_BACKTRACE", "1") };
+    env_logger::init();
     let redis_config = config::valkey::ValkeyConfig::load_env_or_default();
     let redis_client = redis_config.create_client().await?;
 
@@ -29,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let s3_client = s3_config.create_client().await;
 
     let export_service = ExportService::new(
-        "chat-export.parquet".into(),
+        "/tmp/messages.parquet".into(),
         s3_client.clone(),
         redis_client.clone(),
         Some("my-bucket".into()),
