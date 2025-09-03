@@ -43,7 +43,6 @@ impl S3Config {
 
         let base_conf = loader.load().await;
 
-        // 👇 Acá es donde forzás path-style para MinIO
         let conf = Builder::from(&base_conf)
             .force_path_style(true)
             .build();
