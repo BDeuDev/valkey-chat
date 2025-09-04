@@ -28,7 +28,7 @@ impl ExportService {
         Ok(())
     }
 
-    pub async fn export_to_s3(&self, messages: Vec<Message>) -> anyhow::Result<()> {
+    pub async fn export_to_s3(&self, messages: Vec<Message>, file_name: &str) -> anyhow::Result<()> {
         crate::storage::parquet::write_file(messages, &self.export_path)?;
 
         let mut file = File::open(&self.export_path).await?;
@@ -37,7 +37,7 @@ impl ExportService {
         file.read_to_end(&mut buffer).await?;
 
         let bucket = std::env::var("S3_BUCKET").unwrap_or_else(|_| "my-bucket".to_string());
-        let key = "messages.parquet";
+        let key = format!("messages-{}.parquet",file_name);
 
         self.s3_client
             .put_object()

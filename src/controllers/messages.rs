@@ -1,5 +1,5 @@
 use actix_web::{post, get, web, HttpResponse, Responder};
-use crate::controllers::types::MessagePayload;
+use crate::controllers::types::{MessagePayload, MessageQuery};
 use crate::services::message::MessageService;
 
 #[post("/message")]
@@ -13,12 +13,12 @@ async fn create_message(
     }
 }
 
-#[get("/messages/{room}")]
+#[get("/messages")]
 async fn get_messages(
-    path: web::Path<String>,
+    query: web::Query<MessageQuery>,
     service: web::Data<MessageService>,
 ) -> impl Responder {
-    let room = path.into_inner();
+    let room = &query.room;
     match service.get_recent_messages(&room).await {
         Ok(messages) => HttpResponse::Ok().json(messages),
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),

@@ -2,7 +2,7 @@ use actix_cors::Cors;
 use actix_web::{App, HttpServer, middleware::DefaultHeaders, web};
 use tokio;
 
-use crate::{routes::init_routes, services::message::MessageService};
+use crate::{routes::init_routes, services::{history::HistoryService, message::MessageService}};
 
 mod config;
 mod controllers;
@@ -16,6 +16,7 @@ use services::export::ExportService;
 pub struct AppState {
     pub message_service: MessageService,
     pub export_service: ExportService,
+    pub history_service: HistoryService
 }
 
 #[tokio::main]
@@ -37,7 +38,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let message_service = MessageService::new(redis_client.clone());
-
+    let history_service = HistoryService::new(s3_client.clone());
+    
     HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin()
@@ -47,6 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         App::new()
             .app_data(web::Data::new(message_service.clone()))
             .app_data(web::Data::new(export_service.clone()))
+            .app_data(web::Data::new(history_service.clone()))
             .wrap(cors)
             .wrap(
                 DefaultHeaders::new()

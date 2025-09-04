@@ -1,3 +1,5 @@
 /target
 .env
 *.parquet
+minio_data
+logs

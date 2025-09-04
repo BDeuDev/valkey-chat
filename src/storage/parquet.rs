@@ -1,14 +1,14 @@
 use std::{fs::File, sync::Arc};
-
+use actix_web::web::Bytes;
 use arrow::{array::{Int64Array, StringArray}, datatypes::{DataType, Field, Schema}, record_batch::RecordBatch};
 use parquet::{arrow::{arrow_reader::ParquetRecordBatchReaderBuilder, ArrowWriter}, file::properties::WriterProperties};
 
 use crate::models::chat_message::Message;
 
-pub fn read(path: &str) -> anyhow::Result<Vec<Message>> {
-    let file = File::open(path)?;
-
-    let mut arrow_reader = ParquetRecordBatchReaderBuilder::try_new(file)?
+/// Leer mensajes desde `Bytes` (Parquet en memoria)
+pub fn read_from_bytes(bytes: Bytes) -> anyhow::Result<Vec<Message>> {
+    // Bytes implementa ChunkReader, así que va directo
+    let mut arrow_reader = ParquetRecordBatchReaderBuilder::try_new(bytes)?
         .with_batch_size(1024)
         .build()?;
 
@@ -20,22 +20,22 @@ pub fn read(path: &str) -> anyhow::Result<Vec<Message>> {
         let user_col = batch
             .column(0)
             .as_any()
-            .downcast_ref::<arrow::array::StringArray>()
+            .downcast_ref::<StringArray>()
             .unwrap();
         let room_col = batch
             .column(1)
             .as_any()
-            .downcast_ref::<arrow::array::StringArray>()
+            .downcast_ref::<StringArray>()
             .unwrap();
         let text_col = batch
             .column(2)
             .as_any()
-            .downcast_ref::<arrow::array::StringArray>()
+            .downcast_ref::<StringArray>()
             .unwrap();
         let ts_col = batch
             .column(3)
             .as_any()
-            .downcast_ref::<arrow::array::Int64Array>()
+            .downcast_ref::<Int64Array>()
             .unwrap();
 
         for i in 0..batch.num_rows() {

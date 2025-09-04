@@ -52,6 +52,22 @@ valkey-chat/
 ├── entrypoint.sh                    # Script for container startup
 └── README.md                        # Project documentation
 ```
+## 🔑 Configuration
+
+Set environment variables in .env:
+
+```bash
+# Valkey (Redis-compatible)
+VALKEY_HOST=valkey
+VALKEY_PORT=6379
+
+# S3 / MinIO
+S3_ENDPOINT=http://minio:9000
+S3_BUCKET=valkey-chat
+S3_REGION=us-east-1
+S3_ACCESS_KEY=minio
+S3_SECRET_KEY=minio123
+```
 
 ## ⚙️ Installation
 
@@ -72,20 +88,6 @@ docker-compose up --build
 The API will be available at:
 👉 http://localhost:8080
 
+## 📡 API Endpoints
 
-## 🔑 Configuration
-
-Set environment variables in .env:
-
-```bash
-# Valkey (Redis-compatible)
-VALKEY_HOST=127.0.0.1
-VALKEY_PORT=6379
-
-# S3 / MinIO
-S3_ENDPOINT=http://172.19.0.2:9000
-S3_BUCKET=valkey-chat
-S3_REGION=us-east-1
-S3_ACCESS_KEY=minio
-S3_SECRET_KEY=minio123
-```
+### 1. 
