@@ -5,9 +5,7 @@ use parquet::{arrow::{arrow_reader::ParquetRecordBatchReaderBuilder, ArrowWriter
 
 use crate::models::chat_message::Message;
 
-/// Leer mensajes desde `Bytes` (Parquet en memoria)
 pub fn read_from_bytes(bytes: Bytes) -> anyhow::Result<Vec<Message>> {
-    // Bytes implementa ChunkReader, así que va directo
     let mut arrow_reader = ParquetRecordBatchReaderBuilder::try_new(bytes)?
         .with_batch_size(1024)
         .build()?;
@@ -82,4 +80,45 @@ pub fn write_file(messages: Vec<Message>, path: &str) -> Result<(),parquet::erro
     writer.close()?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::NamedTempFile;
+    use std::fs;
+
+    #[test]
+    fn test_write_and_read_parquet() {
+        let messages = vec![
+            Message {
+                user: "alice".to_string(),
+                room: "general".to_string(),
+                text: "hello".to_string(),
+                timestamp: 123,
+            },
+            Message {
+                user: "bob".to_string(),
+                room: "general".to_string(),
+                text: "hi".to_string(),
+                timestamp: 456,
+            },
+        ];
+
+        let tmpfile = NamedTempFile::new().unwrap();
+        let path = tmpfile.path().to_str().unwrap();
+
+        write_file(messages.clone(), path).unwrap();
+
+        let raw = fs::read(path).unwrap();
+        let bytes = Bytes::from(raw);
+
+        let result = read_from_bytes(bytes).unwrap();
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].user, "alice");
+        assert_eq!(result[0].text, "hello");
+        assert_eq!(result[1].user, "bob");
+        assert_eq!(result[1].text, "hi");
+    }
 }
