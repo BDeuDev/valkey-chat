@@ -90,4 +90,21 @@ The API will be available at:
 
 ## 📡 API Endpoints
 
-### 1. 
+### 1. Store Message
+
+```bash
+POST api/v1/message
+Content-Type: application/json
+
+{
+  "room": "general",
+  "user": "alice",
+  "text": "Hello World!"
+}
+```
+### 2. Export to Parquet
+
+```bash
+GET api/v1/export?room={room_name}
+```
+Exports all recent messages from Valkey to Parquet (locally or S3).
