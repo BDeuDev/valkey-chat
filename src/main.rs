@@ -2,7 +2,7 @@ use actix_cors::Cors;
 use actix_web::{App, HttpServer, middleware::DefaultHeaders, web};
 use tokio;
 
-use crate::{routes::init_routes, services::{history::HistoryService, message::MessageService}};
+use crate::{routes::init_routes, services::{history_service::HistoryService, message_service::MessageService}};
 
 mod config;
 mod controllers;
@@ -11,7 +11,7 @@ mod routes;
 mod services;
 mod storage;
 
-use services::export::ExportService;
+use services::export_service::ExportService;
 #[derive(Clone)]
 pub struct AppState {
     pub message_service: MessageService,

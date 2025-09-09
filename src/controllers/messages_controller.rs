@@ -1,6 +1,6 @@
 use actix_web::{post, get, web, HttpResponse, Responder};
 use crate::controllers::types::{MessagePayload, MessageQuery};
-use crate::services::message::MessageService;
+use crate::services::message_service::MessageService;
 
 #[post("/message")]
 async fn create_message(

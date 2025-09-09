@@ -1,6 +1,6 @@
 use actix_web::{get, web, HttpResponse, Responder};
 
-use crate::{controllers::types::{ImportQuery}, services::history::HistoryService, storage::parquet::read_from_bytes};
+use crate::{controllers::types::{ImportQuery}, services::history_service::HistoryService, storage::parquet::read_from_bytes};
 
 
 #[get("/history")]

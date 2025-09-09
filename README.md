@@ -102,9 +102,16 @@ Content-Type: application/json
   "text": "Hello World!"
 }
 ```
-### 2. Export to Parquet
+### 2. Obtain 100 recent messages
+
+```bash
+GET api/v1/messages?room={room_name}
+```
+Get all recent messages by room from Valkey
+
+### 3. Export to Parquet
 
 ```bash
 GET api/v1/export?room={room_name}
 ```
-Exports all recent messages from Valkey to Parquet (locally or S3).
+Exports all messages by room from Valkey to Parquet (locally or S3).

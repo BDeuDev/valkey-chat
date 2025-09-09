@@ -1,3 +1,3 @@
-pub mod message;
-pub mod export;
-pub mod history;
+pub mod message_service;
+pub mod export_service;
+pub mod history_service;

@@ -1,5 +1,5 @@
 use actix_web::{get, web, HttpResponse, Responder};
-use crate::{controllers::types::{ExportQuery,}, services::{export::ExportService, message::MessageService}};
+use crate::{controllers::types::{ExportQuery,}, services::{export_service::ExportService, message_service::MessageService}};
 
 #[get("/export")]
 async fn export_messages_by_room(export_svc: web::Data<ExportService>, msg_svc: web::Data<MessageService>, query: web::Query<ExportQuery>) -> impl Responder {
