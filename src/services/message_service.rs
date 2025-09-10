@@ -32,6 +32,8 @@ impl MessageService {
 
         let _: () = conn.ltrim(&key, 0, 99).await?;
 
+        let _: () = conn.publish("chat:events", "new_message").await?;
+
         Ok(())
     }
 

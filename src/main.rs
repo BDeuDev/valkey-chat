@@ -2,7 +2,7 @@ use actix_cors::Cors;
 use actix_web::{App, HttpServer, middleware::DefaultHeaders, web};
 use tokio;
 
-use crate::{routes::init_routes, services::{history_service::HistoryService, message_service::MessageService}};
+use crate::{routes::init_routes, services::{history_service::HistoryService, message_service::MessageService, trigger_service::TriggerService}};
 
 mod config;
 mod controllers;
@@ -10,6 +10,7 @@ mod models;
 mod routes;
 mod services;
 mod storage;
+mod workers;
 
 use services::export_service::ExportService;
 #[derive(Clone)]
@@ -39,7 +40,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let message_service = MessageService::new(redis_client.clone());
     let history_service = HistoryService::new(s3_client.clone());
-    
+    let trigger_service = TriggerService::new("http://localhost:8080/api/v1/export?room=general".into());
+
     HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin()
