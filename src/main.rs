@@ -2,7 +2,7 @@ use actix_cors::Cors;
 use actix_web::{App, HttpServer, middleware::DefaultHeaders, web};
 use tokio;
 
-use crate::{routes::init_routes, services::{history_service::HistoryService, message_service::MessageService, trigger_service::TriggerService}};
+use crate::{routes::init_routes, services::{history_service::HistoryService, message_service::MessageService, trigger_service::TriggerService}, workers::pubsub_worker::PubSubWorker};
 
 mod config;
 mod controllers;
@@ -42,7 +42,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let history_service = HistoryService::new(s3_client.clone());
     let trigger_service = TriggerService::new("http://localhost:8080/api/v1/export?room=general".into());
 
-    HttpServer::new(move || {
+    let worker = PubSubWorker::new(redis_client.clone(), trigger_service, "chat:events", 10).run();
+
+    let server = HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin()
             .allow_any_method()
@@ -70,8 +72,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .bind(("0.0.0.0", 8080))?
     .max_connections(2000)
     .workers(4)
-    .run()
-    .await?;
+    .run();
 
+
+    let (worker_res, server_res) = tokio::join!(
+        async { worker.await },
+        async { server.await }
+    );
+
+    if let Err(e) = worker_res {
+        eprintln!("❌ Worker error: {:?}", e);
+    }
+    if let Err(e) = server_res {
+        eprintln!("❌ Server error: {:?}", e);
+    }
     Ok(())
 }

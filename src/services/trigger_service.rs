@@ -15,7 +15,7 @@ impl TriggerService {
     }
 
     pub async fn trigger(&self) -> anyhow::Result<()> {
-        let res = self.http.post(&self.endpoint_url).send().await?;
+        let res = self.http.get(&self.endpoint_url).send().await?;
         if res.status().is_success() {
             println!("✅ Endpoint disparado con éxito: {}", self.endpoint_url);
         } else {

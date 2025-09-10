@@ -1,4 +1,4 @@
-use redis::aio::{PubSub, MultiplexedConnection};
+use redis::aio::{MultiplexedConnection, PubSub};
 use redis::{AsyncCommands, Client};
 use futures_util::StreamExt;
 
@@ -22,22 +22,17 @@ impl PubSubWorker {
     }
 
     pub async fn run(self) -> redis::RedisResult<()> {
-        // 🔹 1: crear conexión async normal y convertirla en PubSub
-        let mut pubsub: PubSub = self.client
-            .get_multiplexed_async_connection()
-            .await?
-            .into
-
+        let mut pubsub: PubSub = self.client.get_async_pubsub().await?;
         pubsub.subscribe(&self.channel).await?;
         let mut stream = pubsub.on_message();
 
-        // 🔹 2: otra conexión multiplexada para hacer INCR
-        let mut conn: MultiplexedConnection = self.client.get_multiplexed_tokio_connection().await?;
+        let mut cmd_conn: MultiplexedConnection =
+            self.client.get_multiplexed_tokio_connection().await?;
 
         while let Some(msg) = stream.next().await {
-            let _: String = msg.get_payload()?; // mensaje publicado (ej: "nuevo_registro")
+            let _: String = msg.get_payload()?;
 
-            let count: i64 = conn.incr("chat:counter", 1).await?;
+            let count: i64 = cmd_conn.incr("chat:counter", 1).await?;
             println!("📨 Nuevo evento recibido. Contador = {}", count);
 
             if count % self.limit == 0 {
