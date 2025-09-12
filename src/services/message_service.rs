@@ -30,18 +30,18 @@ impl MessageService {
 
         let _: () = conn.lpush(&key, serialized).await?;
 
-        let _: () = conn.ltrim(&key, 0, 99).await?;
+        let _: () = conn.ltrim(&key, 0, 9).await?;
 
         let _: () = conn.publish("chat:events", "new_message").await?;
 
         Ok(())
     }
 
-    pub async fn get_recent_messages(&self, room: &str) -> Result<Vec<Message>,redis::RedisError> {
+    pub async fn get_recent_messages(&self, room: &str) -> Result<Vec<Message>, redis::RedisError> {
         let mut conn = self.redis_client.get_multiplexed_tokio_connection().await?;
         let key = format!("chat:{}:messages", room);
 
-        let serialized: Vec<String> = conn.lrange(key, 0, 99).await?;
+        let serialized: Vec<String> = conn.lrange(key, 0, 9).await?;
         let messages: Vec<Message> = serialized
             .into_iter()
             .filter_map(|s| serde_json::from_str(&s).ok())
@@ -54,7 +54,7 @@ impl MessageService {
         let mut conn = self.redis_client.get_multiplexed_tokio_connection().await?;
         let key = format!("chat:{}:messages", room);
 
-        let serialized: Vec<String> = conn.lrange(key, 0, -1) .await?;
+        let serialized: Vec<String> = conn.lrange(key, 0, -1).await?;
         let messages: Vec<Message> = serialized
             .into_iter()
             .filter_map(|s| serde_json::from_str(&s).ok())

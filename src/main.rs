@@ -23,7 +23,6 @@ pub struct AppState {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::dotenv().ok();
-    let _ = unsafe { std::env::set_var("RUST_BACKTRACE", "1") };
     env_logger::init();
     let redis_config = config::valkey::ValkeyConfig::load_env_or_default();
     let redis_client = redis_config.create_client().await?;

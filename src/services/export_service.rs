@@ -1,5 +1,5 @@
 use anyhow::Ok;
-use aws_sdk_s3::{primitives::ByteStream, Client as S3Client};
+use aws_sdk_s3::{Client as S3Client, primitives::ByteStream};
 use redis::Client;
 use tokio::{fs::File, io::AsyncReadExt};
 
@@ -14,7 +14,12 @@ pub struct ExportService {
 }
 
 impl ExportService {
-    pub fn new(export_path: String, s3_client: S3Client, redis_client: Client, bucket: Option<String>) -> Self {
+    pub fn new(
+        export_path: String,
+        s3_client: S3Client,
+        redis_client: Client,
+        bucket: Option<String>,
+    ) -> Self {
         Self {
             export_path,
             s3_client,
@@ -28,7 +33,11 @@ impl ExportService {
         Ok(())
     }
 
-    pub async fn export_to_s3(&self, messages: Vec<Message>, file_name: &str) -> anyhow::Result<()> {
+    pub async fn export_to_s3(
+        &self,
+        messages: Vec<Message>,
+        file_name: &str,
+    ) -> anyhow::Result<()> {
         crate::storage::parquet::write_file(messages, &self.export_path)?;
 
         let mut file = File::open(&self.export_path).await?;
@@ -37,7 +46,7 @@ impl ExportService {
         file.read_to_end(&mut buffer).await?;
 
         let bucket = std::env::var("S3_BUCKET").unwrap_or_else(|_| "my-bucket".to_string());
-        let key = format!("messages-{}.parquet",file_name);
+        let key = format!("messages-{}.parquet", file_name);
 
         self.s3_client
             .put_object()
@@ -46,7 +55,7 @@ impl ExportService {
             .body(ByteStream::from(buffer))
             .send()
             .await?;
-        
+
         Ok(())
     }
 }

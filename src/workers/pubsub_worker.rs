@@ -33,12 +33,12 @@ impl PubSubWorker {
             let _: String = msg.get_payload()?;
 
             let count: i64 = cmd_conn.incr("chat:counter", 1).await?;
-            println!("📨 Nuevo evento recibido. Contador = {}", count);
+            println!("📨 New event recv. Count = {}", count);
 
             if count % self.limit == 0 {
-                println!("🚀 Se alcanzó el límite de {} eventos", self.limit);
+                println!("🚀 The limit was reached {} events", self.limit);
                 if let Err(err) = self.trigger_service.trigger().await {
-                    eprintln!("⚠️ Error al disparar endpoint: {:?}", err);
+                    eprintln!("⚠️ Error triggering endpoint: {:?}", err);
                 }
             }
         }

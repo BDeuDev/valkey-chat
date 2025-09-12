@@ -1,6 +1,6 @@
 use actix_web::web::Bytes;
-use aws_sdk_s3::Client;
 use anyhow::Result;
+use aws_sdk_s3::Client;
 
 #[derive(Clone)]
 pub struct HistoryService {
@@ -16,7 +16,8 @@ impl HistoryService {
         let bucket = std::env::var("S3_BUCKET").unwrap_or_else(|_| "my-bucket".to_string());
         let key = format!("messages-{}.parquet", file_name);
 
-        let resp: aws_sdk_s3::operation::get_object::GetObjectOutput = self.s3_client
+        let resp: aws_sdk_s3::operation::get_object::GetObjectOutput = self
+            .s3_client
             .get_object()
             .bucket(&bucket)
             .key(&key)
